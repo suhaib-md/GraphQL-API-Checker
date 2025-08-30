@@ -3,34 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GraphQL API Tester</title>
+    <title>Advanced GraphQL API Tester</title>
     <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --error: #f56565;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass: rgba(255, 255, 255, 0.95);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
+            margin: 0;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg-gradient);
             min-height: 100vh;
             color: #333;
+            line-height: 1.6;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                max-width: 800px;
+            }
         }
         
         .container {
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--glass);
             backdrop-filter: blur(10px);
-            border-radius: 16px;
+            border-radius: var(--border-radius);
             padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
         }
         
         h1 {
             color: #4a5568;
             margin-bottom: 30px;
             font-size: 2rem;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-align: center;
+        }
+
+        h2, h3, h4 {
+            color: #2d3748;
+            margin-top: 0;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #718096;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
         
         .form-group {
@@ -52,12 +133,11 @@
             font-size: 14px;
             transition: all 0.3s ease;
             font-family: 'Monaco', 'Courier New', monospace;
-            box-sizing: border-box;
         }
         
         input:focus, textarea:focus, select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
@@ -65,14 +145,20 @@
             min-height: 120px;
             resize: vertical;
         }
+
+        .code-editor {
+            min-height: 200px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+        }
         
         button {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
             color: white;
             border: none;
             padding: 12px 24px;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -80,7 +166,7 @@
             margin-bottom: 10px;
         }
         
-        button:hover {
+        button:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
@@ -90,25 +176,42 @@
             cursor: not-allowed;
             transform: none;
         }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #718096, #4a5568);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, var(--success), #38a169);
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, var(--warning), #dd6b20);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, var(--error), #e53e3e);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
         
         .preset-button {
-            background: linear-gradient(45deg, #48bb78, #38a169);
+            background: linear-gradient(45deg, var(--success), #38a169);
             padding: 8px 16px;
             font-size: 14px;
             margin: 4px;
             display: inline-block;
         }
         
-        .preset-button:hover {
-            background: linear-gradient(45deg, #38a169, #2f855a);
-        }
-        
         .result {
-            margin-top: 30px;
+            margin-top: 20px;
             padding: 20px;
             background: #f7fafc;
             border-radius: 8px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid var(--primary);
         }
         
         .result h3 {
@@ -126,59 +229,12 @@
             line-height: 1.5;
             white-space: pre-wrap;
             word-wrap: break-word;
+            max-height: 400px;
         }
         
-        .error {
-            border-left-color: #f56565;
-            background: #fed7d7;
-        }
-        
-        .success {
-            border-left-color: #48bb78;
-            background: #c6f6d5;
-        }
-        
-        .warning {
-            border-left-color: #ed8936;
-            background: #feebc8;
-        }
-        
-        .preset-queries {
-            margin-bottom: 20px;
-            padding: 20px;
-            background: #edf2f7;
-            border-radius: 8px;
-        }
-        
-        .preset-queries h3 {
-            margin-top: 0;
-            color: #2d3748;
-        }
-        
-        .cors-help {
-            margin-top: 20px;
-            padding: 16px;
-            background: #bee3f8;
-            border-radius: 8px;
-            border-left: 4px solid #3182ce;
-        }
-        
-        .cors-help h4 {
-            margin-top: 0;
-            color: #2c5282;
-        }
-        
-        .cors-help code {
-            background: #2d3748;
-            color: #e2e8f0;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        
-        .loading {
-            opacity: 0.7;
-        }
+        .error { border-left-color: var(--error); background: #fed7d7; }
+        .success { border-left-color: var(--success); background: #c6f6d5; }
+        .warning { border-left-color: var(--warning); background: #feebc8; }
         
         .status-indicator {
             display: inline-block;
@@ -188,77 +244,239 @@
             margin-right: 8px;
         }
         
-        .status-connecting { background-color: #ed8936; }
-        .status-connected { background-color: #48bb78; }
-        .status-error { background-color: #f56565; }
-        
-        .headers-section {
-            margin-top: 20px;
-            padding: 16px;
-            background: #f0f4f8;
-            border-radius: 8px;
-        }
-        
+        .status-connecting { background-color: var(--warning); }
+        .status-connected { background-color: var(--success); }
+        .status-error { background-color: var(--error); }
+
         .header-input {
             display: flex;
             gap: 10px;
             margin-bottom: 10px;
             align-items: center;
         }
-        
+
         .header-input input {
             margin-bottom: 0;
+            flex: 1;
         }
-        
+
         .remove-header {
-            background: #f56565;
+            background: var(--error);
             color: white;
             border: none;
             padding: 8px 12px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .environment-selector {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #edf2f7;
+            border-radius: 8px;
+        }
+
+        .request-history {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f0f4f8;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .history-item:hover {
+            background: #e2e8f0;
+        }
+
+        .history-item-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .history-item-time {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .schema-explorer {
+            font-family: monospace;
+            font-size: 12px;
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .schema-type {
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .schema-type:hover {
+            background: #e2e8f0;
+        }
+
+        .auth-methods {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .auth-method {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .auth-method.active {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .metric {
+            background: #f0f4f8;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #718096;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚀 GraphQL API Tester</h1>
-        
-        <div class="form-group">
-            <label for="endpoint">
-                <span class="status-indicator" id="status-indicator"></span>
-                GraphQL Endpoint:
-            </label>
-            <input type="text" id="endpoint" value="http://localhost:8001/graphql">
-        </div>
-        
-        <div class="form-group">
-            <label for="token">Bearer Token:</label>
-            <input type="text" id="token" value="devtoken123">
-        </div>
-        
-        <div class="headers-section">
-            <h4>Custom Headers:</h4>
-            <div id="custom-headers">
-                <!-- Custom headers will be added here -->
+    <div class="main-container">
+        <div class="container">
+            <h1>🚀 Advanced GraphQL API Tester</h1>
+            
+            <!-- Environment & Connection -->
+            <div class="environment-selector">
+                <div class="form-group">
+                    <label>Environment:</label>
+                    <select id="environment" onchange="loadEnvironment()">
+                        <option value="local">Local Development</option>
+                        <option value="staging">Staging</option>
+                        <option value="production">Production</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="endpoint">
+                        <span class="status-indicator" id="status-indicator"></span>
+                        GraphQL Endpoint:
+                    </label>
+                    <input type="text" id="endpoint" value="http://localhost:8001/graphql">
+                </div>
             </div>
-            <button onclick="addCustomHeader()" style="font-size: 14px; padding: 6px 12px;">+ Add Header</button>
-        </div>
-        
-        <div class="preset-queries">
-            <h3>📝 Preset Queries:</h3>
-            <button class="preset-button" onclick="loadQuery('list')">List Projects</button>
-            <button class="preset-button" onclick="loadQuery('summary')">Project Summary</button>
-            <button class="preset-button" onclick="loadQuery('create')">Create Project</button>
-            <button class="preset-button" onclick="loadQuery('getById')">Get by ID</button>
-            <button class="preset-button" onclick="loadQuery('filter')">Filter Active</button>
-            <button class="preset-button" onclick="loadQuery('introspection')">Schema Info</button>
-        </div>
-        
-        <div class="form-group">
-            <label for="query">GraphQL Query/Mutation:</label>
-            <textarea id="query" placeholder="Enter your GraphQL query here...">
+
+            <!-- Authentication -->
+            <div class="form-group">
+                <label>Authentication Method:</label>
+                <div class="auth-methods">
+                    <div class="auth-method active" onclick="setAuthMethod('bearer')" data-method="bearer">Bearer Token</div>
+                    <div class="auth-method" onclick="setAuthMethod('basic')" data-method="basic">Basic Auth</div>
+                    <div class="auth-method" onclick="setAuthMethod('api-key')" data-method="api-key">API Key</div>
+                    <div class="auth-method" onclick="setAuthMethod('none')" data-method="none">None</div>
+                </div>
+                
+                <div id="auth-bearer" class="auth-config">
+                    <input type="text" id="token" placeholder="Bearer token" value="devtoken123">
+                </div>
+                
+                <div id="auth-basic" class="auth-config" style="display: none;">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="basic-username" placeholder="Username" style="flex: 1;">
+                        <input type="password" id="basic-password" placeholder="Password" style="flex: 1;">
+                    </div>
+                </div>
+                
+                <div id="auth-api-key" class="auth-config" style="display: none;">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="api-key-name" placeholder="Header name (e.g., X-API-Key)" style="flex: 1;">
+                        <input type="text" id="api-key-value" placeholder="API Key value" style="flex: 1;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Headers -->
+            <div class="form-group">
+                <label>Custom Headers:</label>
+                <div id="custom-headers"></div>
+                <button class="btn-secondary btn-small" onclick="addCustomHeader()">+ Add Header</button>
+            </div>
+
+            <!-- Tabs for different operations -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('query')">Query/Mutation</button>
+                <button class="tab" onclick="switchTab('subscription')">Subscriptions</button>
+                <button class="tab" onclick="switchTab('batch')">Batch Operations</button>
+                <button class="tab" onclick="switchTab('file-upload')">File Upload</button>
+            </div>
+
+            <!-- Query Tab -->
+            <div id="query-tab" class="tab-content active">
+                <div class="form-group">
+                    <label for="query">GraphQL Query/Mutation:</label>
+                    <textarea id="query" class="code-editor" placeholder="Enter your GraphQL query here...">
 {
   projects(first: 5) {
     totalCount
@@ -277,40 +495,156 @@
     }
   }
 }</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="variables">Variables (JSON):</label>
+                    <textarea id="variables" class="code-editor" placeholder='{"first": 5}' style="min-height: 80px;">{}</textarea>
+                </div>
+
+                <button id="execute-btn" onclick="executeQuery()">🚀 Execute Query</button>
+                <button class="btn-secondary" onclick="formatQuery()">🎨 Format</button>
+                <button class="btn-secondary" onclick="validateQuery()">✓ Validate</button>
+                <button class="btn-warning" onclick="testConnection()">🔗 Test Connection</button>
+                <button class="btn-danger" onclick="clearResult()">🗑️ Clear</button>
+            </div>
+
+            <!-- Subscription Tab -->
+            <div id="subscription-tab" class="tab-content">
+                <div class="form-group">
+                    <label for="subscription-query">Subscription Query:</label>
+                    <textarea id="subscription-query" class="code-editor" placeholder="subscription { ... }">
+subscription {
+  projectUpdates {
+    id
+    name
+    status
+    updatedAt
+  }
+}</textarea>
+                </div>
+                
+                <button id="subscribe-btn" onclick="startSubscription()">📡 Start Subscription</button>
+                <button class="btn-danger" onclick="stopSubscription()">⏹️ Stop</button>
+                
+                <div id="subscription-status" style="margin-top: 10px;"></div>
+            </div>
+
+            <!-- Batch Operations Tab -->
+            <div id="batch-tab" class="tab-content">
+                <div class="form-group">
+                    <label>Batch Operations (JSON Array):</label>
+                    <textarea id="batch-operations" class="code-editor" style="min-height: 200px;">
+[
+  {
+    "query": "{ projects(first: 2) { totalCount } }",
+    "variables": {}
+  },
+  {
+    "query": "{ projectSummary { totalProjects activeProjects } }",
+    "variables": {}
+  }
+]</textarea>
+                </div>
+                
+                <button onclick="executeBatch()">🔄 Execute Batch</button>
+                <button class="btn-secondary" onclick="addBatchOperation()">+ Add Operation</button>
+            </div>
+
+            <!-- File Upload Tab -->
+            <div id="file-upload-tab" class="tab-content">
+                <div class="form-group">
+                    <label>File Upload Mutation:</label>
+                    <textarea id="file-mutation" class="code-editor">
+mutation uploadFile($file: Upload!) {
+  uploadFile(file: $file) {
+    success
+    url
+    filename
+  }
+}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="file-input">Select File:</label>
+                    <input type="file" id="file-input" multiple>
+                </div>
+                
+                <button onclick="executeFileUpload()">📤 Upload File</button>
+            </div>
+
+            <!-- Results -->
+            <div id="result"></div>
+
+            <!-- Performance Metrics -->
+            <div id="metrics" class="metrics" style="display: none;"></div>
         </div>
-        
-        <div class="form-group">
-            <label for="variables">Variables (JSON):</label>
-            <textarea id="variables" placeholder='{"first": 5}' style="min-height: 80px;">{}</textarea>
-        </div>
-        
-        <button id="execute-btn" onclick="executeQuery()">🚀 Execute Query</button>
-        <button onclick="clearResult()">🗑️ Clear Result</button>
-        <button onclick="testConnection()">🔗 Test Connection</button>
-        
-        <div id="result"></div>
-        
-        <div class="cors-help" id="cors-help" style="display: none;">
-            <h4>🛠️ CORS Error Help</h4>
-            <p>Your GraphQL server needs to allow CORS requests. Add this to your server:</p>
-            
-            <p><strong>Express.js + Apollo Server:</strong></p>
-            <code>
-const cors = require('cors');<br>
-app.use(cors());
-            </code>
-            
-            <p><strong>Alternative solutions:</strong></p>
-            <ul>
-                <li>Use a browser extension like "CORS Unblock" for testing</li>
-                <li>Run Chrome with <code>--disable-web-security --user-data-dir</code> flags</li>
-                <li>Serve this HTML file from a web server instead of opening it directly</li>
-                <li>Use a tool like GraphiQL or GraphQL Playground instead</li>
-            </ul>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Preset Queries -->
+            <div class="form-group">
+                <h3>📝 Preset Queries</h3>
+                <button class="preset-button" onclick="loadQuery('list')">List Projects</button>
+                <button class="preset-button" onclick="loadQuery('summary')">Project Summary</button>
+                <button class="preset-button" onclick="loadQuery('create')">Create Project</button>
+                <button class="preset-button" onclick="loadQuery('getById')">Get by ID</button>
+                <button class="preset-button" onclick="loadQuery('filter')">Filter Active</button>
+                <button class="preset-button" onclick="loadQuery('introspection')">Schema Info</button>
+                <button class="preset-button" onclick="loadQuery('mutation')">Update Project</button>
+                <button class="preset-button" onclick="loadQuery('delete')">Delete Project</button>
+            </div>
+
+            <!-- Request History -->
+            <div class="form-group">
+                <h3>📚 Request History</h3>
+                <div class="request-history" id="request-history">
+                    <div style="color: #718096; font-size: 14px; text-align: center; padding: 20px;">
+                        No requests yet
+                    </div>
+                </div>
+                <button class="btn-secondary btn-small" onclick="clearHistory()">Clear History</button>
+                <button class="btn-secondary btn-small" onclick="exportHistory()">Export</button>
+            </div>
+
+            <!-- Schema Explorer -->
+            <div class="form-group">
+                <h3>🔍 Schema Explorer</h3>
+                <button class="btn-secondary btn-small" onclick="fetchSchema()" style="margin-bottom: 10px;">Fetch Schema</button>
+                <div class="schema-explorer" id="schema-explorer">
+                    Click "Fetch Schema" to explore the GraphQL schema
+                </div>
+            </div>
+
+            <!-- Settings -->
+            <div class="form-group">
+                <h3>⚙️ Settings</h3>
+                <label>
+                    <input type="checkbox" id="auto-format" checked> Auto-format responses
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" id="show-metrics" checked> Show performance metrics
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" id="save-history" checked> Save request history
+                </label>
+                <br>
+                <label>
+                    Request timeout (ms): <input type="number" id="timeout" value="30000" style="width: 80px; margin-top: 5px;">
+                </label>
+            </div>
         </div>
     </div>
 
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
     <script>
+        // Enhanced preset queries with more examples
         const presetQueries = {
             list: {
                 query: `{
@@ -324,6 +658,8 @@ app.use(cors());
         budget
         tags
         ownerId
+        createdAt
+        updatedAt
       }
     }
     pageInfo {
@@ -347,15 +683,8 @@ app.use(cors());
                 variables: '{}'
             },
             create: {
-                query: `mutation {
-  createProject(input: {
-    name: "Test Project from UI"
-    description: "Created using the test interface"
-    status: ACTIVE
-    tags: ["ui-test", "demo"]
-    budget: 25000
-    ownerId: "test_user"
-  }) {
+                query: `mutation CreateProject($input: CreateProjectInput!) {
+  createProject(input: $input) {
     success
     error
     project {
@@ -367,11 +696,53 @@ app.use(cors());
     }
   }
 }`,
-                variables: '{}'
+                variables: `{
+  "input": {
+    "name": "Test Project from UI",
+    "description": "Created using the test interface",
+    "status": "ACTIVE",
+    "tags": ["ui-test", "demo"],
+    "budget": 25000,
+    "ownerId": "test_user"
+  }
+}`
+            },
+            mutation: {
+                query: `mutation UpdateProject($id: ID!, $input: UpdateProjectInput!) {
+  updateProject(id: $id, input: $input) {
+    success
+    error
+    project {
+      id
+      name
+      status
+      budget
+      updatedAt
+    }
+  }
+}`,
+                variables: `{
+  "id": "proj_apollo_001",
+  "input": {
+    "status": "COMPLETED",
+    "budget": 30000
+  }
+}`
+            },
+            delete: {
+                query: `mutation DeleteProject($id: ID!) {
+  deleteProject(id: $id) {
+    success
+    error
+  }
+}`,
+                variables: `{
+  "id": "proj_to_delete"
+}`
             },
             getById: {
-                query: `{
-  project(id: "proj_apollo_001") {
+                query: `query GetProject($id: ID!) {
+  project(id: $id) {
     id
     name
     description
@@ -384,11 +755,13 @@ app.use(cors());
     updatedAt
   }
 }`,
-                variables: '{}'
+                variables: `{
+  "id": "proj_apollo_001"
+}`
             },
             filter: {
-                query: `{
-  projects(status: ACTIVE, first: 10) {
+                query: `query FilterProjects($status: ProjectStatus, $first: Int) {
+  projects(status: $status, first: $first) {
     totalCount
     edges {
       node {
@@ -402,15 +775,28 @@ app.use(cors());
     }
   }
 }`,
-                variables: '{}'
+                variables: `{
+  "status": "ACTIVE",
+  "first": 10
+}`
             },
             introspection: {
                 query: `{
   __schema {
+    queryType { name }
+    mutationType { name }
+    subscriptionType { name }
     types {
       name
       kind
       description
+      fields {
+        name
+        type {
+          name
+          kind
+        }
+      }
     }
   }
 }`,
@@ -418,16 +804,90 @@ app.use(cors());
             }
         };
 
-        let customHeaders = [];
+        // Environments configuration
+        const environments = {
+            local: {
+                endpoint: 'http://localhost:8001/graphql',
+                token: 'devtoken123'
+            },
+            staging: {
+                endpoint: 'https://staging-api.example.com/graphql',
+                token: 'staging_token_here'
+            },
+            production: {
+                endpoint: 'https://api.example.com/graphql',
+                token: 'production_token_here'
+            },
+            custom: {
+                endpoint: '',
+                token: ''
+            }
+        };
 
-        function loadQuery(type) {
-            const preset = presetQueries[type];
-            if (preset) {
-                document.getElementById('query').value = preset.query;
-                document.getElementById('variables').value = preset.variables;
+        let customHeaders = [];
+        let requestHistory = [];
+        let currentAuth = 'bearer';
+        let subscriptionConnection = null;
+
+        // Tab management
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        // Environment management
+        function loadEnvironment() {
+            const env = document.getElementById('environment').value;
+            const config = environments[env];
+            
+            if (env !== 'custom') {
+                document.getElementById('endpoint').value = config.endpoint;
+                document.getElementById('token').value = config.token;
             }
         }
 
+        // Authentication methods
+        function setAuthMethod(method) {
+            document.querySelectorAll('.auth-method').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.auth-config').forEach(el => el.style.display = 'none');
+            
+            event.target.classList.add('active');
+            document.getElementById('auth-' + method).style.display = 'block';
+            currentAuth = method;
+        }
+
+        // Get authentication headers
+        function getAuthHeaders() {
+            const headers = {};
+            
+            switch(currentAuth) {
+                case 'bearer':
+                    const token = document.getElementById('token').value;
+                    if (token) headers['Authorization'] = `Bearer ${token}`;
+                    break;
+                    
+                case 'basic':
+                    const username = document.getElementById('basic-username').value;
+                    const password = document.getElementById('basic-password').value;
+                    if (username && password) {
+                        headers['Authorization'] = `Basic ${btoa(username + ':' + password)}`;
+                    }
+                    break;
+                    
+                case 'api-key':
+                    const keyName = document.getElementById('api-key-name').value;
+                    const keyValue = document.getElementById('api-key-value').value;
+                    if (keyName && keyValue) headers[keyName] = keyValue;
+                    break;
+            }
+            
+            return headers;
+        }
+
+        // Custom headers management
         function addCustomHeader() {
             const headerId = Date.now();
             customHeaders.push({ id: headerId, key: '', value: '' });
@@ -444,9 +904,9 @@ app.use(cors());
             container.innerHTML = customHeaders.map(header => `
                 <div class="header-input">
                     <input type="text" placeholder="Header name" value="${header.key}" 
-                           onchange="updateCustomHeader(${header.id}, 'key', this.value)" style="flex: 1;">
+                           onchange="updateCustomHeader(${header.id}, 'key', this.value)">
                     <input type="text" placeholder="Header value" value="${header.value}"
-                           onchange="updateCustomHeader(${header.id}, 'value', this.value)" style="flex: 2;">
+                           onchange="updateCustomHeader(${header.id}, 'value', this.value)">
                     <button class="remove-header" onclick="removeCustomHeader(${header.id})">×</button>
                 </div>
             `).join('');
@@ -459,25 +919,97 @@ app.use(cors());
             }
         }
 
+        function getCustomHeadersObject() {
+            const headers = {};
+            customHeaders.forEach(header => {
+                if (header.key && header.value) {
+                    headers[header.key] = header.value;
+                }
+            });
+            return headers;
+        }
+
+        // Status indicator
         function updateStatus(status) {
             const indicator = document.getElementById('status-indicator');
             indicator.className = `status-indicator status-${status}`;
         }
 
+        // Query management
+        function loadQuery(type) {
+            const preset = presetQueries[type];
+            if (preset) {
+                document.getElementById('query').value = preset.query;
+                document.getElementById('variables').value = preset.variables;
+            }
+        }
+
+        // Format GraphQL query
+        function formatQuery() {
+            const query = document.getElementById('query').value;
+            try {
+                // Simple formatting - in a real app you'd use a GraphQL parser
+                const formatted = query
+                    .replace(/\s*{\s*/g, ' {\n  ')
+                    .replace(/\s*}\s*/g, '\n}\n')
+                    .replace(/,/g, ',\n  ')
+                    .trim();
+                document.getElementById('query').value = formatted;
+            } catch (e) {
+                showResult('❌ Format error: ' + e.message, 'error');
+            }
+        }
+
+        // Validate query
+        function validateQuery() {
+            const query = document.getElementById('query').value.trim();
+            const variables = document.getElementById('variables').value;
+            
+            let errors = [];
+            
+            if (!query) {
+                errors.push('Query is required');
+            }
+            
+            try {
+                if (variables.trim()) {
+                    JSON.parse(variables);
+                }
+            } catch (e) {
+                errors.push('Invalid JSON in variables: ' + e.message);
+            }
+            
+            // Basic GraphQL syntax validation
+            if (query) {
+                const braceCount = (query.match(/{/g) || []).length - (query.match(/}/g) || []).length;
+                if (braceCount !== 0) {
+                    errors.push('Unmatched braces in query');
+                }
+            }
+            
+            if (errors.length === 0) {
+                showResult('✅ Query validation passed', 'success');
+            } else {
+                showResult('❌ Validation errors:\n' + errors.join('\n'), 'error');
+            }
+        }
+
+        // Test connection
         async function testConnection() {
             const endpoint = document.getElementById('endpoint').value;
-            const token = document.getElementById('token').value;
             
             updateStatus('connecting');
             
             try {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeaders(),
+                    ...getCustomHeadersObject()
+                };
+
                 const response = await fetch(endpoint, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                        ...getCustomHeadersObject()
-                    },
+                    headers,
                     body: JSON.stringify({
                         query: '{ __typename }'
                     })
@@ -492,35 +1024,23 @@ app.use(cors());
                 }
             } catch (error) {
                 updateStatus('error');
-                if (error.message.includes('CORS') || error.message.includes('fetch')) {
-                    showCorsHelp();
-                    showResult('❌ CORS Error: ' + error.message, 'error');
-                } else {
-                    showResult('❌ Connection error: ' + error.message, 'error');
-                }
+                showResult('❌ Connection error: ' + error.message, 'error');
             }
         }
 
-        function getCustomHeadersObject() {
-            const headers = {};
-            customHeaders.forEach(header => {
-                if (header.key && header.value) {
-                    headers[header.key] = header.value;
-                }
-            });
-            return headers;
-        }
-
+        // Execute query with performance metrics
         async function executeQuery() {
             const endpoint = document.getElementById('endpoint').value;
-            const token = document.getElementById('token').value;
             const query = document.getElementById('query').value;
             const variables = document.getElementById('variables').value;
             const executeBtn = document.getElementById('execute-btn');
+            const timeout = parseInt(document.getElementById('timeout').value) || 30000;
 
             executeBtn.disabled = true;
             executeBtn.textContent = '⏳ Executing...';
-            document.getElementById('cors-help').style.display = 'none';
+            
+            const startTime = performance.now();
+            updateStatus('connecting');
 
             let parsedVariables = {};
             try {
@@ -539,19 +1059,48 @@ app.use(cors());
             };
 
             try {
-                updateStatus('connecting');
-                
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeaders(),
+                    ...getCustomHeadersObject()
+                };
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+
                 const response = await fetch(endpoint, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                        ...getCustomHeadersObject()
-                    },
-                    body: JSON.stringify(payload)
+                    headers,
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
                 });
 
+                clearTimeout(timeoutId);
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+
                 const result = await response.json();
+                
+                // Show metrics if enabled
+                if (document.getElementById('show-metrics').checked) {
+                    showMetrics({
+                        duration,
+                        status: response.status,
+                        size: JSON.stringify(result).length
+                    });
+                }
+
+                // Save to history if enabled
+                if (document.getElementById('save-history').checked) {
+                    saveToHistory({
+                        query,
+                        variables: parsedVariables,
+                        result,
+                        timestamp: new Date(),
+                        duration,
+                        status: response.status
+                    });
+                }
                 
                 if (response.ok) {
                     updateStatus('connected');
@@ -569,9 +1118,10 @@ app.use(cors());
                 }
             } catch (error) {
                 updateStatus('error');
-                if (error.message.includes('CORS') || error.name === 'TypeError') {
-                    showCorsHelp();
-                    showResult('❌ CORS Error: Cannot connect to server. See help below.', 'error');
+                if (error.name === 'AbortError') {
+                    showResult('❌ Request timed out', 'error');
+                } else if (error.message.includes('CORS') || error.name === 'TypeError') {
+                    showResult('❌ CORS Error: Cannot connect to server. Check your endpoint and CORS settings.', 'error');
                 } else {
                     showResult('❌ Network error: ' + error.message, 'error');
                 }
@@ -580,6 +1130,382 @@ app.use(cors());
             resetButton();
         }
 
+        // Execute batch operations
+        async function executeBatch() {
+            const endpoint = document.getElementById('endpoint').value;
+            const batchOps = document.getElementById('batch-operations').value;
+            
+            try {
+                const operations = JSON.parse(batchOps);
+                if (!Array.isArray(operations)) {
+                    throw new Error('Batch operations must be an array');
+                }
+
+                showResult('⏳ Executing batch operations...', 'warning');
+
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeaders(),
+                    ...getCustomHeadersObject()
+                };
+
+                const results = [];
+                for (let i = 0; i < operations.length; i++) {
+                    const op = operations[i];
+                    try {
+                        const response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers,
+                            body: JSON.stringify(op)
+                        });
+                        const result = await response.json();
+                        results.push({
+                            operation: i + 1,
+                            status: response.status,
+                            result
+                        });
+                    } catch (error) {
+                        results.push({
+                            operation: i + 1,
+                            error: error.message
+                        });
+                    }
+                }
+
+                showResult(JSON.stringify(results, null, 2), 'success');
+            } catch (error) {
+                showResult('❌ Batch execution error: ' + error.message, 'error');
+            }
+        }
+
+        // Add batch operation
+        function addBatchOperation() {
+            const current = document.getElementById('batch-operations').value;
+            try {
+                const operations = JSON.parse(current);
+                operations.push({
+                    query: "{ __typename }",
+                    variables: {}
+                });
+                document.getElementById('batch-operations').value = JSON.stringify(operations, null, 2);
+            } catch (e) {
+                document.getElementById('batch-operations').value = `[
+  {
+    "query": "{ __typename }",
+    "variables": {}
+  }
+]`;
+            }
+        }
+
+        // File upload
+        async function executeFileUpload() {
+            const endpoint = document.getElementById('endpoint').value;
+            const mutation = document.getElementById('file-mutation').value;
+            const fileInput = document.getElementById('file-input');
+            
+            if (!fileInput.files.length) {
+                showResult('❌ Please select a file to upload', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            
+            // GraphQL multipart request spec
+            const operations = {
+                query: mutation,
+                variables: { file: null }
+            };
+            
+            const map = { "0": ["variables.file"] };
+            
+            formData.append('operations', JSON.stringify(operations));
+            formData.append('map', JSON.stringify(map));
+            formData.append('0', fileInput.files[0]);
+
+            try {
+                const headers = {
+                    ...getAuthHeaders(),
+                    ...getCustomHeadersObject()
+                };
+                // Don't set Content-Type for multipart/form-data
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers,
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult(JSON.stringify(result, null, 2), 'success');
+                } else {
+                    showResult(`❌ Upload failed: ${JSON.stringify(result, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult('❌ File upload error: ' + error.message, 'error');
+            }
+        }
+
+        // Subscription management
+        function startSubscription() {
+            const endpoint = document.getElementById('endpoint').value;
+            const query = document.getElementById('subscription-query').value;
+            
+            // Convert HTTP endpoint to WebSocket
+            const wsEndpoint = endpoint.replace('http://', 'ws://').replace('https://', 'wss://');
+            
+            try {
+                subscriptionConnection = new WebSocket(wsEndpoint, 'graphql-ws');
+                
+                subscriptionConnection.onopen = function() {
+                    document.getElementById('subscription-status').innerHTML = 
+                        '<span style="color: green;">✅ Connected</span>';
+                    
+                    // Send connection init
+                    subscriptionConnection.send(JSON.stringify({
+                        type: 'connection_init'
+                    }));
+                    
+                    // Send subscription
+                    subscriptionConnection.send(JSON.stringify({
+                        id: '1',
+                        type: 'start',
+                        payload: { query }
+                    }));
+                };
+                
+                subscriptionConnection.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'data') {
+                        showResult(JSON.stringify(data.payload, null, 2), 'success');
+                    }
+                };
+                
+                subscriptionConnection.onerror = function(error) {
+                    document.getElementById('subscription-status').innerHTML = 
+                        '<span style="color: red;">❌ Error: ' + error.message + '</span>';
+                };
+                
+                subscriptionConnection.onclose = function() {
+                    document.getElementById('subscription-status').innerHTML = 
+                        '<span style="color: orange;">⚠️ Disconnected</span>';
+                };
+                
+            } catch (error) {
+                showResult('❌ Subscription error: ' + error.message, 'error');
+            }
+        }
+
+        function stopSubscription() {
+            if (subscriptionConnection) {
+                subscriptionConnection.close();
+                subscriptionConnection = null;
+                document.getElementById('subscription-status').innerHTML = 
+                    '<span style="color: gray;">⏹️ Stopped</span>';
+            }
+        }
+
+        // Schema explorer
+        async function fetchSchema() {
+            const endpoint = document.getElementById('endpoint').value;
+            
+            const introspectionQuery = `
+                query IntrospectionQuery {
+                    __schema {
+                        queryType { name }
+                        mutationType { name }
+                        subscriptionType { name }
+                        types {
+                            ...FullType
+                        }
+                    }
+                }
+                
+                fragment FullType on __Type {
+                    kind
+                    name
+                    description
+                    fields(includeDeprecated: true) {
+                        name
+                        description
+                        args {
+                            ...InputValue
+                        }
+                        type {
+                            ...TypeRef
+                        }
+                        isDeprecated
+                        deprecationReason
+                    }
+                }
+                
+                fragment InputValue on __InputValue {
+                    name
+                    description
+                    type { ...TypeRef }
+                    defaultValue
+                }
+                
+                fragment TypeRef on __Type {
+                    kind
+                    name
+                    ofType {
+                        kind
+                        name
+                        ofType {
+                            kind
+                            name
+                            ofType {
+                                kind
+                                name
+                            }
+                        }
+                    }
+                }
+            `;
+
+            try {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeaders(),
+                    ...getCustomHeadersObject()
+                };
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ query: introspectionQuery })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.data) {
+                    renderSchema(result.data.__schema);
+                } else {
+                    document.getElementById('schema-explorer').innerHTML = 
+                        '<span style="color: red;">Failed to fetch schema</span>';
+                }
+            } catch (error) {
+                document.getElementById('schema-explorer').innerHTML = 
+                    '<span style="color: red;">Schema fetch error: ' + error.message + '</span>';
+            }
+        }
+
+        function renderSchema(schema) {
+            const explorer = document.getElementById('schema-explorer');
+            
+            const types = schema.types.filter(type => 
+                !type.name.startsWith('__') && 
+                ['OBJECT', 'INPUT_OBJECT', 'ENUM'].includes(type.kind)
+            );
+
+            const html = types.map(type => `
+                <div class="schema-type" onclick="toggleTypeDetails('${type.name}')">
+                    <strong>${type.kind}: ${type.name}</strong>
+                    ${type.description ? `<div style="font-size: 11px; color: #666;">${type.description}</div>` : ''}
+                    <div id="type-${type.name}" style="display: none; margin-left: 15px; font-size: 11px;">
+                        ${type.fields ? type.fields.map(field => `
+                            <div>• ${field.name}: ${getTypeName(field.type)}</div>
+                        `).join('') : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            explorer.innerHTML = html;
+        }
+
+        function toggleTypeDetails(typeName) {
+            const element = document.getElementById('type-' + typeName);
+            element.style.display = element.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function getTypeName(type) {
+            if (type.name) return type.name;
+            if (type.kind === 'LIST') return '[' + getTypeName(type.ofType) + ']';
+            if (type.kind === 'NON_NULL') return getTypeName(type.ofType) + '!';
+            return 'Unknown';
+        }
+
+        // History management
+        function saveToHistory(request) {
+            requestHistory.unshift(request);
+            if (requestHistory.length > 50) {
+                requestHistory = requestHistory.slice(0, 50);
+            }
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('request-history');
+            
+            if (requestHistory.length === 0) {
+                container.innerHTML = '<div style="color: #718096; font-size: 14px; text-align: center; padding: 20px;">No requests yet</div>';
+                return;
+            }
+
+            const html = requestHistory.map((request, index) => `
+                <div class="history-item" onclick="loadFromHistory(${index})">
+                    <div class="history-item-title">
+                        ${request.query.split('\n')[0].substring(0, 50)}...
+                    </div>
+                    <div class="history-item-time">
+                        ${request.timestamp.toLocaleTimeString()} - ${request.duration}ms
+                        <span style="color: ${request.status < 400 ? 'green' : 'red'}">
+                            (${request.status})
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        function loadFromHistory(index) {
+            const request = requestHistory[index];
+            document.getElementById('query').value = request.query;
+            document.getElementById('variables').value = JSON.stringify(request.variables, null, 2);
+            showResult(JSON.stringify(request.result, null, 2), request.status < 400 ? 'success' : 'error');
+        }
+
+        function clearHistory() {
+            requestHistory = [];
+            renderHistory();
+        }
+
+        function exportHistory() {
+            const data = JSON.stringify(requestHistory, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'graphql-history-' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Performance metrics
+        function showMetrics(metrics) {
+            const metricsDiv = document.getElementById('metrics');
+            metricsDiv.style.display = 'grid';
+            metricsDiv.innerHTML = `
+                <div class="metric">
+                    <div class="metric-value">${metrics.duration}ms</div>
+                    <div class="metric-label">Response Time</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${metrics.status}</div>
+                    <div class="metric-label">HTTP Status</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${(metrics.size / 1024).toFixed(1)}KB</div>
+                    <div class="metric-label">Response Size</div>
+                </div>
+            `;
+        }
+
+        // Utility functions
         function resetButton() {
             const executeBtn = document.getElementById('execute-btn');
             executeBtn.disabled = false;
@@ -601,45 +1527,48 @@ app.use(cors());
                 title = 'Warning - Check Errors';
             }
             
+            // Auto-format if enabled
+            let formattedContent = content;
+            if (document.getElementById('auto-format').checked && typeof content === 'string') {
+                try {
+                    const parsed = JSON.parse(content);
+                    formattedContent = JSON.stringify(parsed, null, 2);
+                } catch (e) {
+                    // Keep original content if parsing fails
+                }
+            }
+            
             resultDiv.innerHTML = `
                 <h3>${icon} ${title}</h3>
-                <pre>${content}</pre>
+                <pre>${formattedContent}</pre>
             `;
-        }
-
-        function showCorsHelp() {
-            document.getElementById('cors-help').style.display = 'block';
         }
 
         function clearResult() {
             document.getElementById('result').innerHTML = '';
-            document.getElementById('cors-help').style.display = 'none';
+            document.getElementById('metrics').style.display = 'none';
             updateStatus('');
         }
 
-        // Initialize with some common headers
-        function initializeHeaders() {
-            // Start with no custom headers, but ready to add them
-        }
-
-        // Load default query on page load
+        // Initialize app
         window.onload = function() {
             loadQuery('list');
-            initializeHeaders();
+            renderCustomHeaders();
+            renderHistory();
             updateStatus('');
         };
 
-        // Auto-save form state to prevent loss
+        // Auto-save form state
         function saveFormState() {
             const state = {
                 endpoint: document.getElementById('endpoint').value,
+                environment: document.getElementById('environment').value,
+                auth: currentAuth,
                 token: document.getElementById('token').value,
                 query: document.getElementById('query').value,
                 variables: document.getElementById('variables').value,
                 customHeaders: customHeaders
             };
-            
-            // Store in a simple variable since localStorage isn't available
             window.formState = state;
         }
 
@@ -647,19 +1576,43 @@ app.use(cors());
             if (window.formState) {
                 const state = window.formState;
                 document.getElementById('endpoint').value = state.endpoint || 'http://localhost:8001/graphql';
+                document.getElementById('environment').value = state.environment || 'local';
                 document.getElementById('token').value = state.token || 'devtoken123';
                 document.getElementById('query').value = state.query || '';
                 document.getElementById('variables').value = state.variables || '{}';
                 customHeaders = state.customHeaders || [];
+                
+                if (state.auth) {
+                    setAuthMethod(state.auth);
+                }
+                
                 renderCustomHeaders();
             }
         }
 
         // Auto-save on input changes
         document.addEventListener('input', saveFormState);
-        
-        // Restore state on load
         document.addEventListener('DOMContentLoaded', restoreFormState);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'Enter':
+                        e.preventDefault();
+                        executeQuery();
+                        break;
+                    case 'k':
+                        e.preventDefault();
+                        document.getElementById('query').focus();
+                        break;
+                    case 'l':
+                        e.preventDefault();
+                        clearResult();
+                        break;
+                }
+            }
+        });
     </script>
 </body>
 </html>
